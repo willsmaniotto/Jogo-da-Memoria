@@ -3,7 +3,9 @@
  */
  const box = document.querySelector('.deck');
  var cards = document.querySelectorAll(".card");
+ console.log(cards);
  var openCards = [];
+ var countCards = 0;
 
 
 /*
@@ -33,7 +35,7 @@ function start(){
 }
 
 
-// Shuffle function from http://stackoverflow.com/a/2450976x
+// Shuffle function from http://stackoverflow.com/a/2450976
 function shuffle(array) {
     var currentIndex = array.length, temporaryValue, randomIndex;
 
@@ -53,18 +55,59 @@ function showSymbol(card){
 	card.className+=" open show";
 }
 
+//Bloqueia o par aberto corretamente
+function block(card1, card2){
+	//Atualiza a classe das duas cartas
+	card1.className="card match";
+	card2.className="card match";
+	//Remove os eventos de navegador do par de cartas
+	card1.removeEventListener('click', clickDetected);
+	card2.removeEventListener('click', clickDetected);
+}
+
+//Esconde o par aberto incorretamente
+
+
 //Cria lista de cartas abertas
 function cardOpen(card){
 	//Verifica se já existe uma carta aberta
-	if (openCards[0]===undefined){
+	if (openCards[countCards]===undefined){
 		//Se não, salva a primeira carta aberta
-		openCards[0]=card;
+		openCards[countCards]=card;
 	} else {
+		//Incrementa quantidade de cartas abertas
+		countCards++;
 		//Se sim, salva a segunda carta
-		openCards[1]=card;
-		//Indica que deve verificar se as cartas abertas são iguais
-		return 1;
+		openCards[countCards]=card;
+		//Se as imagens das duas cartas forem iguais
+		if (openCards[countCards-1].firstElementChild.className === openCards[countCards].firstElementChild.className){
+			//Bloqueia o par aberto corretamente
+			block(openCards[countCards-1], openCards[countCards]);
+			//Incrementa o índice da lista de cartas
+			countCards++;
+		} else {
+			//Se não forem, esconde novamente as cartas após 1s
+			setTimeout(function hide(){
+				//Atualiza a classe das duas cartas
+				openCards[countCards-1].className="card";
+				openCards[countCards].className="card";
+				//Remove o par aberto da lista de cartas abertas
+				openCards[countCards-1]=undefined;
+				openCards[countCards]=undefined;
+				//Decrementa o índice da lista de cartas
+				countCards--;
+			}, 1000);			
+		}
 	}
+}
+
+function clickDetected(event){
+	// Indica se deve ou não verificar as cartas abertas
+	var check=0;
+	//Chama função para exibir a carta clicada
+	showSymbol(event.target);
+	//Cria lista de cartas abertas
+	cardOpen(event.target);
 }
 
 //Adiciona eventos de cliques as cartas do jogo
@@ -72,18 +115,7 @@ function click(){
 	//Percorre todas as cartas
 	for (var i=0; i<cards.length; i++){
 		//Adiciona evento de click a todas as cartas
-		cards[i].addEventListener('click', function (event){
-			// Indica se deve ou não verificar as cartas abertas
-			var check=0;
-			//Chama função para exibir a carta clicada
-			showSymbol(event.target);
-			//Cria lista de cartas abertas
-			check = cardOpen(event.target);
-			//Se deve verificar as cartas abertas
-			if(check==1){
-
-			}
-		});
+		cards[i].addEventListener('click', clickDetected);
 	}
 }
 /*
