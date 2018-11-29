@@ -1,9 +1,9 @@
 /*
  * Create a list that holds all of your cards
  */
- const box=document.querySelector('.deck');
- var cards=document.querySelectorAll(".card");
- var openCards=0;
+ const box = document.querySelector('.deck');
+ var cards = document.querySelectorAll(".card");
+ var openCards = [];
 
 
 /*
@@ -33,7 +33,7 @@ function start(){
 }
 
 
-// Shuffle function from http://stackoverflow.com/a/2450976
+// Shuffle function from http://stackoverflow.com/a/2450976x
 function shuffle(array) {
     var currentIndex = array.length, temporaryValue, randomIndex;
 
@@ -53,14 +53,36 @@ function showSymbol(card){
 	card.className+=" open show";
 }
 
+//Cria lista de cartas abertas
+function cardOpen(card){
+	//Verifica se já existe uma carta aberta
+	if (openCards[0]===undefined){
+		//Se não, salva a primeira carta aberta
+		openCards[0]=card;
+	} else {
+		//Se sim, salva a segunda carta
+		openCards[1]=card;
+		//Indica que deve verificar se as cartas abertas são iguais
+		return 1;
+	}
+}
+
 //Adiciona eventos de cliques as cartas do jogo
 function click(){
 	//Percorre todas as cartas
 	for (var i=0; i<cards.length; i++){
 		//Adiciona evento de click a todas as cartas
 		cards[i].addEventListener('click', function (event){
+			// Indica se deve ou não verificar as cartas abertas
+			var check=0;
 			//Chama função para exibir a carta clicada
 			showSymbol(event.target);
+			//Cria lista de cartas abertas
+			check = cardOpen(event.target);
+			//Se deve verificar as cartas abertas
+			if(check==1){
+
+			}
 		});
 	}
 }
