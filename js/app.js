@@ -203,7 +203,6 @@ function cardOpen(card){
 		//Centraliza botão
 		button.style.margin = "auto";
 		button.style.display = "block";
-		button.style.display = "block";
 		button.style.fontSize = "-webkit-xxx-large";
 		//Adiciona botão ao quadro
 		box.appendChild(button);
