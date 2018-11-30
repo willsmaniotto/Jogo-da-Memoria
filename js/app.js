@@ -11,6 +11,7 @@
  var openCards = [];
  var countCards = 0;
  var countStars = 3;
+ var seconds = 0;
  var mov = 0;
 
 
@@ -27,6 +28,19 @@ function remove(){
 	for (var i=0; i<cards.length; i++){
 		cards[i].remove();
 	}	
+}
+
+//Incrementa os segundos
+function addSeconds(){
+	//Incrementa contador
+	seconds++;
+	//Atualiza segundos do jogo
+	timer.textContent = seconds;
+	//Se ainda não finalizou o jogo
+	if(countCards<16){
+		//Chama a função a cada segundo
+		setTimeout('addSeconds()', 1000)
+	}
 }
 
 //Inicializa o jogo
@@ -64,8 +78,13 @@ function start(){
 	countCards = 0;
 	//Inicializa lista de cartas abertas
 	openCards = {undefined};
+	//Inicializa timer
+	seconds = 0;
+	timer.textContent = "0";
 	//Adiciona eventos de clique as cartas
  	click();
+ 	//Conta os segundos
+ 	addSeconds();
 }
 
 
@@ -165,7 +184,7 @@ function cardOpen(card){
 		//Indica que aceita nova linha
 		winMessage.style.whiteSpace = "pre";
 		//Edita corpo da mensagem
-		winMessage.textContent = ("Parabéns! Você Venceu!\r\nCom "+mov+" movimentos e "+countStars+" estrelas!");
+		winMessage.textContent = ("Parabéns! Você Venceu!\r\nCom "+mov+" movimentos e "+countStars+" estrelas!\r\nVocê levou "+seconds+" segundos");
 		//Adiciona a mensagens ao quadro
 		box.appendChild(winMessage);
 	}
