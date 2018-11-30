@@ -7,12 +7,12 @@
  var moves = document.querySelector('.moves');
  var timer = document.querySelector('.timer');
  var restart = document.querySelector('.restart');
- console.log(cards);
  var openCards = [];
  var countCards = 0;
  var countStars = 3;
  var seconds = 0;
  var mov = 0;
+ var cardsControl = 0;
 
 
 /*
@@ -47,8 +47,10 @@ function addSeconds(){
 function start(){
 	//Se o jogador havia vencido
 	if(countCards===16){
-		//Remove texto da vitória
-		box.removeChild(box.firstElementChild);
+		//Remove todos elementos do quadro
+		while (box.firstElementChild) {
+ 		   box.removeChild(box.firstElementChild);
+		}
 	} else {
 		//Remove todas as cartas
 		remove();
@@ -99,13 +101,14 @@ function shuffle(array) {
         array[currentIndex] = array[randomIndex];
         array[randomIndex] = temporaryValue;
     }
-    console.log(array);
     return array;
 }
 
 //Apresenta a carta desvirada
 function showSymbol(card){
 	card.className+=" open show";
+	//Remove evento de clique da carta desvirada
+	card.removeEventListener('click', clickDetected);
 }
 
 //Bloqueia o par aberto corretamente
@@ -113,9 +116,8 @@ function block(card1, card2){
 	//Atualiza a classe das duas cartas
 	card1.className="card match";
 	card2.className="card match";
-	//Remove os eventos de navegador do par de cartas
-	card1.removeEventListener('click', clickDetected);
-	card2.removeEventListener('click', clickDetected);
+	//Inicializa número de cartas abertas na jogada
+	cardsControl = 0;
 }
 
 //Esconde o par de cartas viradas incorretamente
@@ -123,11 +125,16 @@ function hide(){
 	//Atualiza a classe das duas cartas
 	openCards[countCards-1].className="card";
 	openCards[countCards].className="card";
+	//Adiciona novamente evento de clique as cartas
+	openCards[countCards-1].addEventListener('click', clickDetected);
+	openCards[countCards].addEventListener('click', clickDetected);
 	//Remove o par aberto da lista de cartas abertas
 	openCards[countCards-1]=undefined;
 	openCards[countCards]=undefined;
 	//Decrementa o índice da lista de cartas
 	countCards--;
+	//Inicializa número de cartas abertas na jogada
+	cardsControl = 0;
 }
 
 //Atualiza placar
@@ -151,6 +158,8 @@ function boardUp(){
 
 //Cria lista de cartas abertas
 function cardOpen(card){
+	//Incrementa número de cartas na jogada
+	cardsControl++;
 	//Verifica se já existe uma carta aberta
 	if (openCards[countCards]===undefined){
 		//Se não, salva a primeira carta aberta
@@ -184,21 +193,41 @@ function cardOpen(card){
 		//Indica que aceita nova linha
 		winMessage.style.whiteSpace = "pre";
 		//Edita corpo da mensagem
-		winMessage.textContent = ("Parabéns! Você Venceu!\r\nCom "+mov+" movimentos e "+countStars+" estrelas!\r\nVocê levou "+seconds+" segundos");
+		winMessage.textContent = ("Parabéns! Você Venceu!\r\nCom "+mov+" movimentos e "+countStars+" estrelas!\r\nVocê levou "+(seconds+1)+" segundos");
 		//Adiciona a mensagens ao quadro
 		box.appendChild(winMessage);
+		//Cria botão de reinício
+		var button = document.createElement("button");
+		//Indica texto do botão
+		button.innerHTML = "Jogar novamente";
+		//Centraliza botão
+		button.style.margin = "auto";
+		button.style.display = "block";
+		button.style.display = "block";
+		button.style.fontSize = "-webkit-xxx-large";
+		//Adiciona botão ao quadro
+		box.appendChild(button);
+		//Adiciona evento de clique ao botão
+		button.addEventListener("click", start);
 	}
 }
 
 function clickDetected(event){
-	// Indica se deve ou não verificar as cartas abertas
-	var check=0;
-	//Incrementa número de movimentos
-	mov++;
-	//Chama função para exibir a carta clicada
-	showSymbol(event.target);
-	//Cria lista de cartas abertas
-	cardOpen(event.target);
+	//Se já tiver duas cartas abertas
+	if(cardsControl===2){
+		//Não aceita o evento de clique para abrir uma terceira carta
+		event.stopPropagation();
+		event.preventDefault();
+	} else {
+		// Indica se deve ou não verificar as cartas abertas
+		var check=0;
+		//Incrementa número de movimentos
+		mov++;
+		//Chama função para exibir a carta clicada
+		showSymbol(event.target);
+		//Cria lista de cartas abertas
+		cardOpen(event.target);
+	}
 }
 
 //Adiciona eventos de cliques as cartas do jogo
@@ -206,7 +235,7 @@ function click(){
 	//Percorre todas as cartas
 	for (var i=0; i<cards.length; i++){
 		//Adiciona evento de click a todas as cartas
-		cards[i].addEventListener('click', clickDetected);
+		cards[i].addEventListener('click', clickDetected, true);
 	}
 	//Adiciona evento de clique ao botão de restart
 	restart.addEventListener('click', start);
