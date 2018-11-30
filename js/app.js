@@ -3,9 +3,15 @@
  */
  const box = document.querySelector('.deck');
  var cards = document.querySelectorAll(".card");
+ var stars = document.querySelectorAll('.fa-star');
+ var moves = document.querySelector('.moves');
+ var timer = document.querySelector('.timer');
+ var restart = document.querySelector('.restart');
  console.log(cards);
  var openCards = [];
  var countCards = 0;
+ var countStars = 3;
+ var mov = 0;
 
 
 /*
@@ -14,10 +20,24 @@
  *   - loop through each card and create its HTML
  *   - add each card's HTML to the page
  */
-function start(){
+
+ //Remove todas as cartas do quadro
+function remove(){
 	//Remove todos as cartas da tela
 	for (var i=0; i<cards.length; i++){
 		cards[i].remove();
+	}	
+}
+
+//Inicializa o jogo
+function start(){
+	//Se o jogador havia vencido
+	if(countCards===16){
+		//Remove texto da vitória
+		box.removeChild(box.firstElementChild);
+	} else {
+		//Remove todas as cartas
+		remove();
 	}
 	//Embaralha as carts no array
 	cards=shuffle(Array.from(cards));
@@ -32,6 +52,20 @@ function start(){
 		//Adiciona o elemento carta ao quadro do jogo
 		box.appendChild(newCard);
 	}
+	//Inicializa o contador de moviemtos
+	mov=0;
+	moves.textContent="0";
+	//inicializa estrelinhas
+	countStars=3;
+	for(var i=0; i<stars.length; i++){
+		stars[i].className="fa fa-star";
+	}
+	//Inicializa contador de cartas
+	countCards = 0;
+	//Inicializa lista de cartas abertas
+	openCards = {undefined};
+	//Adiciona eventos de clique as cartas
+ 	click();
 }
 
 
@@ -65,7 +99,35 @@ function block(card1, card2){
 	card2.removeEventListener('click', clickDetected);
 }
 
-//Esconde o par aberto incorretamente
+//Esconde o par de cartas viradas incorretamente
+function hide(){
+	//Atualiza a classe das duas cartas
+	openCards[countCards-1].className="card";
+	openCards[countCards].className="card";
+	//Remove o par aberto da lista de cartas abertas
+	openCards[countCards-1]=undefined;
+	openCards[countCards]=undefined;
+	//Decrementa o índice da lista de cartas
+	countCards--;
+}
+
+//Atualiza placar
+function boardUp(){
+	//Atualiza número de movimentos	
+	moves.textContent=mov;
+	//Se tiver feito 17 movimentos
+	if (mov===17){
+		//Deixa apenas duas estrelas
+		stars[2].className="fa ";
+		countStars--;
+	}
+	//Se tiver feito 33 movimentos
+	if (mov===33){
+		//Deixa apenas uma estrela
+		stars[1].className="fa ";
+		countStars--;
+	}
+}
 
 
 //Cria lista de cartas abertas
@@ -86,24 +148,34 @@ function cardOpen(card){
 			//Incrementa o índice da lista de cartas
 			countCards++;
 		} else {
-			//Se não forem, esconde novamente as cartas após 1s
-			setTimeout(function hide(){
-				//Atualiza a classe das duas cartas
-				openCards[countCards-1].className="card";
-				openCards[countCards].className="card";
-				//Remove o par aberto da lista de cartas abertas
-				openCards[countCards-1]=undefined;
-				openCards[countCards]=undefined;
-				//Decrementa o índice da lista de cartas
-				countCards--;
-			}, 1000);			
+			//Se não forem, esconde novamente as cartas após 500ms
+			setTimeout('hide()', 500);			
 		}
+	}
+	//Atualiza placar
+	boardUp();
+	//Se tiver encontrado todos os pares
+	if(countCards===16){
+		//Remove todas as cartas
+		remove();
+		//Cria mensagem da vitória
+		const winMessage = document.createElement('h1');
+		//Centraliza texto
+		winMessage.style.textAlign = "center";
+		//Indica que aceita nova linha
+		winMessage.style.whiteSpace = "pre";
+		//Edita corpo da mensagem
+		winMessage.textContent = ("Parabéns! Você Venceu!\r\nCom "+mov+" movimentos e "+countStars+" estrelas!");
+		//Adiciona a mensagens ao quadro
+		box.appendChild(winMessage);
 	}
 }
 
 function clickDetected(event){
 	// Indica se deve ou não verificar as cartas abertas
 	var check=0;
+	//Incrementa número de movimentos
+	mov++;
 	//Chama função para exibir a carta clicada
 	showSymbol(event.target);
 	//Cria lista de cartas abertas
@@ -117,6 +189,8 @@ function click(){
 		//Adiciona evento de click a todas as cartas
 		cards[i].addEventListener('click', clickDetected);
 	}
+	//Adiciona evento de clique ao botão de restart
+	restart.addEventListener('click', start);
 }
 /*
  * set up the event listener for a card. If a card is clicked:
@@ -131,5 +205,3 @@ function click(){
 
 //Inicializa o jogo embaralho e virando todas as cartas
  start();
- //Adiciona eventos de clique as cartas
- click();
